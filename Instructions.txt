@@ -1,0 +1,78 @@
+# IMPLEMENTATION
+
+# STEPS TO ADD date  COMMAND AS A SYSTEM CALL
+
+1.	Command To be Added as the System Call : "date"  (should print the current date)
+
+2. cd to xv6 on the terminal
+
+3.  Defining the date function and its System Call Number in syscall.h
+
+	Do 'gedit syscall.h' in the terminal. Add '#define SYS_date  22'. and SAVE
+4.	Date Function declaration in the proc.c section of defs.h
+
+	Do 'gedit defs.h'.Under the proc.c section of the file.
+ Add 'int date(void);' and SAVE.
+
+5.	Date Function declaration in the  user.h
+
+	Do 'gedit user.h' in terminal. Add "int date(void)" Below the int uptime(void) function and SAVE
+
+6.	Add date function implementation in the sysproc.c
+
+	Do 'gedit sysproc.c'. Go down and write
+		
+			int 
+			sys_date(void)
+			{
+			 struct rtcdate *r;    //creating a pointer *r of type struct rtcdate
+			 if(argptr(0, (void*)&r, sizeof(r)) < 0)  
+  //passing the pointer as an  argument to the qemu's  cmostime function which prints the    present day's date
+			    return -1;
+			 cmostime(r);	
+			 return 0;
+			}
+ and SAVE
+	
+7.
+		
+  Do' gedit usys.S' and ADD SYSCALL(date) at the end and SAVE
+
+
+8.	Adding function declaration in syscall.c file
+	Do 'gedit syscall.c' and  Add  "extern int sys_date(void);" after the extern sys_uptime(void) and 
+		go down to the SYS section of the same file and Add "[SYS_ps] sys_ps," at the end.
+
+ 
+
+10.	Finally open the user-level program date.c  .This program is used to make system call
+	
+				#include "types.h"
+				#include "user.h"
+				#include "date.h"
+
+				int
+				main(int argc, char *argv[])
+				{
+				  struct rtcdate r;
+
+				  if (date(&r)) {
+				    printf(2, "date failed\n");
+				    exit();
+				  }
+
+				   printf(1,"%d %d %d\n", r.day,r.month,r.year);  
+
+				  exit();
+				}
+
+11.Do 'gedit Makefile' and Add "_ps\"  After the _wc\ section
+
+12.Running it using qemu
+	(MAKE SURE THAT YOU ARE IN xv6 DIRECTORY)
+
+	a)type make in the terminal.It will compile everything again
+
+	b)type make qemu .It will open a new qemu terminal 
+
+	c)type date and it will print the current date
